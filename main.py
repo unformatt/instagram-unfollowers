@@ -1,21 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys
+import sys, os, json, pystache, io, random, requests
 from insta import Instagram
-import os
-import json
-import pystache
-import io
-import webbrowser
-import random
 
-numer = sys.argv[1]
-print " ~ Connecting to Instagram"
 #modify here
-insta = Instagram('usernamefoo', 'passfordfoo')                                   
+USERNAME = sys.argv[1]
+insta = Instagram(USERNAME, sys.argv[2])
+numer = sys.argv[3]
+MAILGUN_API_KEY = sys.argv[4]
+MAILGUN_DOMAIN = sys.argv[5]
+MAILGUN_TO = sys.argv[6]
 
 
+print " ~ Connecting to Instagram"
 if insta.login() == False:
     print "Login failed"
     sys.exit(2)
@@ -29,8 +27,8 @@ for item in temp:
         if user["username"] not in likedUsers:
             data = {}
             data["count"] = 1
-            data["name"] = user["full_name"]
-            data["image"] = user["profile_pic_url"]
+            data["full_name"] = user["full_name"]
+            data["profile_pic_url"] = user["profile_pic_url"]
             data["username"] = user["username"]
             likedUsers[user["username"]] = data
         else:
@@ -114,21 +112,20 @@ for follower in followers:
     if follower["username"] not in likedUsers:
         neverLiked.append(follower)
 
-file = open('template.tpl', 'r')
-html = file.readlines()
-tpl = ''
-for line in html:
-    tpl = tpl + " " + line
 
 likedUsers = sorted(likedUsers.values(),
                     key=lambda x: x["count"], reverse=True)
 
 
 data = {
-    "username": [followersnum, followingsnum],
+    "username": USERNAME,
+    "followersnum": followersnum,
+    "followingsnum": followingsnum,
     "notback": notfollowedback,
+    "num_newfollowers": len(newfollowers),
     "newfollowers": newfollowers,
     "newunfollowers":newunfollowers,
+    "num_newunfollowers": len(newunfollowers),
     "newfollowings": newfollowings,
     "bestlikers": likedUsers[:20],
 #    "badlikers": likedUsers[len(likedUsers) - 10:],
@@ -136,9 +133,35 @@ data = {
     "neverliked": random.sample(neverLiked,10)
 }
 
-print " ~ Creating output.html"
-output = pystache.render(tpl, data)
-with io.open('output.html', 'w', encoding='utf8') as f:
-    f.write(output)
-    
-#webbrowser.open_new_tab('output.html')
+def render_html(data):
+    file = open('template.tpl', 'r')
+    tpl = file.read()
+    file.close()
+
+    path = '%s.html' % USERNAME
+    print " ~ Creating", path
+    output = pystache.render(tpl, data)
+    with io.open(path, 'w', encoding='utf8') as f:
+        f.write(output)
+
+def send_email(data):
+    file = open('email-template.html', 'r')
+    tpl = file.read()
+    file.close()
+    body = pystache.render(tpl, data)
+    _send_email("%s IG Update" % USERNAME.title(), body)
+
+def _send_email(subject, body):
+    return requests.post(
+        "https://api.mailgun.net/v3/%s/messages" % MAILGUN_DOMAIN,
+        auth=("api", MAILGUN_API_KEY),
+        data={"from": "%s <ig@%s>" % (USERNAME, MAILGUN_DOMAIN),
+              "to": [MAILGUN_TO],
+              "subject": subject,
+              "html": body})
+
+
+# render_html(data)
+send_email(data)
+
+exit()
