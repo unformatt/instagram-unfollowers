@@ -134,7 +134,7 @@ data = {
 }
 
 def render_html(data):
-    file = open('template.tpl', 'r')
+    file = open(os.path.join(os.path.realpath(__file__), 'template.tpl'), 'r')
     tpl = file.read()
     file.close()
 
@@ -145,7 +145,7 @@ def render_html(data):
         f.write(output)
 
 def send_email(data):
-    file = open('email-template.html', 'r')
+    file = open(os.path.join(os.path.realpath(__file__), 'email-template.html'), 'r')
     tpl = file.read()
     file.close()
     body = pystache.render(tpl, data)
