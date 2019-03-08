@@ -11,7 +11,8 @@ numer = sys.argv[3]
 MAILGUN_API_KEY = sys.argv[4]
 MAILGUN_DOMAIN = sys.argv[5]
 MAILGUN_TO = sys.argv[6]
-THIS_FOLDER = os.path.realpath(__file__)
+
+THIS_FOLDER = os.path.dirname(os.path.realpath(__file__))
 
 
 def fullpath(file):
