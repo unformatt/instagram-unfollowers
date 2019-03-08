@@ -11,6 +11,11 @@ numer = sys.argv[3]
 MAILGUN_API_KEY = sys.argv[4]
 MAILGUN_DOMAIN = sys.argv[5]
 MAILGUN_TO = sys.argv[6]
+THIS_FOLDER = os.path.realpath(__file__)
+
+
+def fullpath(file):
+    return os.path.join(THIS_FOLDER, file)
 
 
 print " ~ Connecting to Instagram"
@@ -63,7 +68,7 @@ for fr in followings:
 
 newfollowers = []
 if os.path.exists('followers.json'):
-    with open('followers.json') as data_file:
+    with open(fullpath('followers.json')) as data_file:
         oldfollowers = json.load(data_file)
         for fr in followers:
             flag = True
@@ -75,7 +80,7 @@ if os.path.exists('followers.json'):
                 newfollowers.append(fr)
 
 newunfollowers = []
-if os.path.exists('followers.json'):
+if os.path.exists(fullpath('followers.json')):
     with open('followers.json') as data_file:
         oldfollowers = json.load(data_file)
         for fr in oldfollowers:
@@ -88,8 +93,8 @@ if os.path.exists('followers.json'):
                 newunfollowers.append(fr)
 
 newfollowings = []
-if os.path.exists('followings.json'):
-    with open('followings.json') as data_file:
+if os.path.exists(fullpath('followings.json')):
+    with open(fullpath('followings.json')) as data_file:
         oldfollowings = json.load(data_file)
         for fr in followings:
             flag = True
@@ -101,10 +106,10 @@ if os.path.exists('followings.json'):
                 newfollowings.append(fr)
 
 
-with open('followers.json', 'w') as outfile:
+with open(fullpath('followers.json'), 'w') as outfile:
     json.dump(followers, outfile)
 
-with open('followings.json', 'w') as outfile:
+with open(fullpath('followings.json'), 'w') as outfile:
     json.dump(followings, outfile)
 
 neverLiked = []
@@ -134,7 +139,7 @@ data = {
 }
 
 def render_html(data):
-    file = open(os.path.join(os.path.realpath(__file__), 'template.tpl'), 'r')
+    file = open(fullpath('template.tpl'), 'r')
     tpl = file.read()
     file.close()
 
@@ -145,7 +150,7 @@ def render_html(data):
         f.write(output)
 
 def send_email(data):
-    file = open(os.path.join(os.path.realpath(__file__), 'email-template.html'), 'r')
+    file = open(fullpath('email-template.html'), 'r')
     tpl = file.read()
     file.close()
     body = pystache.render(tpl, data)
