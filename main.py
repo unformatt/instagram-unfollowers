@@ -82,7 +82,7 @@ if os.path.exists('followers.json'):
 
 newunfollowers = []
 if os.path.exists(fullpath('followers.json')):
-    with open('followers.json') as data_file:
+    with open(fullpath('followers.json')) as data_file:
         oldfollowers = json.load(data_file)
         for fr in oldfollowers:
             flag = True
