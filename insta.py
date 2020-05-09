@@ -6,6 +6,7 @@ import json
 import random
 import hmac
 import urllib
+import time
 
 class Instagram:
     API_URL = 'https://i.instagram.com/api/v1/'
@@ -86,18 +87,23 @@ class Instagram:
                                 'User-Agent' : self.USER_AGENT})
 
         full_url = self.API_URL + endpoint
-        if (post != None): # POST
-            response = self.s.post(full_url, data=post) # , verify=False
-        else: # GET
-            response = self.s.get(full_url) # , verify=False
+        
+        while 1:
+            if (post != None): # POST
+                response = self.s.post(full_url, data=post) # , verify=False
+            else: # GET
+                response = self.s.get(full_url) # , verify=False
 
-        if response.status_code == 200:
-            self.LastResponse = response
-            self.LastJson = json.loads(response.text)
-            return True
-        else:
-            raise Exception("Request error: %s: %s" % (response.status_code, full_url))
-            return False
+            if response.status_code == 200:
+                self.LastResponse = response
+                self.LastJson = json.loads(response.text)
+                return True
+            elif response.status_code == 429: # rate limit
+                print 'Rate limited, sleep 30s'
+                time.sleep(30)
+            else:
+                raise Exception("Request error: %s: %s" % (response.status_code, full_url))
+                return False
 
     def getUserFollowings(self, usernameId, maxid = ''):
         return self.SendRequest('friendships/'+ str(usernameId) +'/following/?max_id='+ str(maxid)

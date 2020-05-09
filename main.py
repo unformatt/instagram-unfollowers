@@ -18,6 +18,8 @@ THIS_FOLDER = os.path.dirname(os.path.realpath(__file__))
 def fullpath(file):
     return os.path.join(THIS_FOLDER, file)
 
+FOLLOWERS_JSON_FILE = fullpath('followers_%s.json' % USERNAME)
+FOLLOWINGS_JSON_FILE = fullpath('followings_%s.json' % USERNAME)
 
 print " ~ Connecting to Instagram"
 if insta.login() == False:
@@ -26,19 +28,19 @@ if insta.login() == False:
 print " ~ Sending request to Instagram , fetching your feeds"
 temp = insta.getTotalUserFeed(numer)
 likedUsers = {}
-for item in temp:
-    insta.getMediaLikers(item["id"])
-    test = insta.LastJson["users"]
-    for user in test:
-        if user["username"] not in likedUsers:
-            data = {}
-            data["count"] = 1
-            data["full_name"] = user["full_name"]
-            data["profile_pic_url"] = user["profile_pic_url"]
-            data["username"] = user["username"]
-            likedUsers[user["username"]] = data
-        else:
-            likedUsers[user["username"]]["count"] += 1
+# for item in temp:
+#     insta.getMediaLikers(item["id"])
+#     test = insta.LastJson["users"]
+#     for user in test:
+#         if user["username"] not in likedUsers:
+#             data = {}
+#             data["count"] = 1
+#             data["full_name"] = user["full_name"]
+#             data["profile_pic_url"] = user["profile_pic_url"]
+#             data["username"] = user["username"]
+#             likedUsers[user["username"]] = data
+#         else:
+#             likedUsers[user["username"]]["count"] += 1
 
 print " ~ Sending request to Instagram , fetching followers"
 followers = insta.getTotalFollowers(numer)
@@ -68,8 +70,8 @@ for fr in followings:
         notfollowedback.append(fr)
 
 newfollowers = []
-if os.path.exists('followers.json'):
-    with open(fullpath('followers.json')) as data_file:
+if os.path.exists(FOLLOWERS_JSON_FILE):
+    with open(FOLLOWERS_JSON_FILE) as data_file:
         oldfollowers = json.load(data_file)
         for fr in followers:
             flag = True
@@ -81,8 +83,8 @@ if os.path.exists('followers.json'):
                 newfollowers.append(fr)
 
 newunfollowers = []
-if os.path.exists(fullpath('followers.json')):
-    with open(fullpath('followers.json')) as data_file:
+if os.path.exists(FOLLOWERS_JSON_FILE):
+    with open(FOLLOWERS_JSON_FILE) as data_file:
         oldfollowers = json.load(data_file)
         for fr in oldfollowers:
             flag = True
@@ -94,8 +96,8 @@ if os.path.exists(fullpath('followers.json')):
                 newunfollowers.append(fr)
 
 newfollowings = []
-if os.path.exists(fullpath('followings.json')):
-    with open(fullpath('followings.json')) as data_file:
+if os.path.exists(FOLLOWINGS_JSON_FILE):
+    with open(FOLLOWINGS_JSON_FILE) as data_file:
         oldfollowings = json.load(data_file)
         for fr in followings:
             flag = True
@@ -107,10 +109,10 @@ if os.path.exists(fullpath('followings.json')):
                 newfollowings.append(fr)
 
 
-with open(fullpath('followers.json'), 'w') as outfile:
+with open(FOLLOWERS_JSON_FILE, 'w') as outfile:
     json.dump(followers, outfile)
 
-with open(fullpath('followings.json'), 'w') as outfile:
+with open(FOLLOWINGS_JSON_FILE, 'w') as outfile:
     json.dump(followings, outfile)
 
 neverLiked = []
